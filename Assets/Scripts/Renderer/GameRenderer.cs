@@ -8,7 +8,7 @@ public class GameRenderer : MonoBehaviour {
     }
 
     // Update is called once per frame
-    public void Render() {
-        _playerRenderer.Render();
+    public void Render(RendererContext context) {
+        _playerRenderer.Render(context.PlayerModel);
     }
 }
