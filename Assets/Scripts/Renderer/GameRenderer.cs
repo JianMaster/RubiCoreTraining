@@ -1,7 +1,7 @@
 using UnityEngine;
 
 public class GameRenderer : MonoBehaviour {
-    [SerializeField] private PlayerRenderer _playerRenderer;
+    [SerializeField] PlayerRenderer _playerRenderer;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start() {
 

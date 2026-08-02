@@ -1,11 +1,11 @@
 using UnityEngine;
 
 public class Main : MonoBehaviour {
-    [SerializeField] private PlayerController _playerController;
-    [SerializeField] private InputManager _inputManager;
-    [SerializeField] private GameRenderer _gameRenderer;
+    [SerializeField] PlayerController _playerController;
+    [SerializeField] InputManager _inputManager;
+    [SerializeField] GameRenderer _gameRenderer;
 
-    private RendererContext _rendererContext;
+    RendererContext _rendererContext;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start() {
         _rendererContext = new RendererContext();
@@ -13,8 +13,7 @@ public class Main : MonoBehaviour {
 
     void FixedUpdate() {
         InputData inputData = _inputManager.GetInput();
-        _playerController.Move(inputData);
-        _playerController.Jump(inputData);
+        _playerController.RefreshState(inputData);
 
         _rendererContext.PlayerModel = _playerController.PlayerModel;
     }

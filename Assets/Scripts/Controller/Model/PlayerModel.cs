@@ -5,4 +5,5 @@ public struct PlayerModel {
     public float speed;
     public Vector2 lastDir;
     public float jumpForce;
+    public PlayerState state;
 }

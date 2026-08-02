@@ -2,10 +2,10 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class InputManager : MonoBehaviour {
-    [SerializeField] private InputActionReference _moveAction;
-    [SerializeField] private InputActionReference _jumpAction;
+    [SerializeField] InputActionReference _moveAction;
+    [SerializeField] InputActionReference _jumpAction;
 
-    private InputData _inputData;
+    InputData _inputData;
     void OnEnable() {
         _moveAction.action.Enable();
         _jumpAction.action.Enable();
@@ -24,18 +24,25 @@ public class InputManager : MonoBehaviour {
     }
 
     public InputData GetInput() {
-        InputData inputData = _inputData;
+        InputData inputData = _inputData.Copy();
         _inputData.Reset();
         return inputData;
     }
 }
 
-public struct InputData {
+public class InputData {
     public Vector2 direction;
     public bool jump;
 
     public void Reset() {
         direction = Vector2.zero;
         jump = false;
+    }
+
+    public InputData Copy() {
+        return new InputData {
+            direction = this.direction,
+            jump = this.jump
+        };
     }
 }
