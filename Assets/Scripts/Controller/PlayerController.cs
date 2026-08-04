@@ -11,11 +11,26 @@ public class PlayerController : MonoBehaviour {
             pos = Vector2.zero,
             speed = 10f,
             jumpForce = 10f,
+            jumpDuration = 0.5f,
             lastDir = Vector2.up,
             state = PlayerState.Idle
         };
     }
-    
+
+    public void Tick(InputData inputData, float time) {
+        switch (_playerModel.state) {
+            case PlayerState.Idle:
+                UpdateIdle(inputData, time);
+                break;
+            case PlayerState.Walking:
+                UpdateWalk(inputData, time);
+                break;
+            case PlayerState.Jumping:
+                UpdateJump(inputData, time);
+                break;
+        }
+    }
+
     void ChangeState(PlayerState newState, InputData inputData) {
         if (_playerModel.state == newState)
             return;
@@ -33,24 +48,9 @@ public class PlayerController : MonoBehaviour {
             case PlayerState.Idle:
                 break;
             case PlayerState.Walking:
-
                 break;
             case PlayerState.Jumping:
                 EnterJump(inputData);
-                break;
-        }
-    }
-
-    public void RefreshState(InputData inputData) {
-        switch (_playerModel.state) {
-            case PlayerState.Idle:
-                UpdateIdle(inputData);
-                break;
-            case PlayerState.Walking:
-                UpdateWalk(inputData);
-                break;
-            case PlayerState.Jumping:
-                UpdateJump(inputData);
                 break;
         }
     }
@@ -59,19 +59,15 @@ public class PlayerController : MonoBehaviour {
         Debug.Log($"ExitState: {state}");
         switch (_playerModel.state) {
             case PlayerState.Idle:
-
                 break;
             case PlayerState.Walking:
-
                 break;
             case PlayerState.Jumping:
-
                 break;
         }
     }
 
-
-    void UpdateIdle(InputData inputData) {
+    void UpdateIdle(InputData inputData, float time) {
         if (inputData.direction != Vector2.zero) {
             ChangeState(PlayerState.Walking, inputData);
         }
@@ -80,24 +76,41 @@ public class PlayerController : MonoBehaviour {
         }
     }
 
-    void UpdateWalk(InputData inputData) {
-        _playerModel.pos += _playerModel.speed * Time.fixedDeltaTime * inputData.direction;
+    void UpdateWalk(InputData inputData, float time) {
+        if (inputData.direction == Vector2.zero) {
+            ChangeState(PlayerState.Idle, inputData);
+            return;
+        }
+        if (inputData.jump) {
+            ChangeState(PlayerState.Jumping, inputData);
+            return;
+        }
+        _playerModel.pos += _playerModel.speed * time * inputData.direction;
         _playerModel.lastDir = inputData.direction;
         // Debug.Log($"Player pos: {inputData.direction}");
     }
 
+    Vector2 _jumpStartPos;
+    Vector2 _jumpEndPos;
+    float _jumpTime;
+    // 跳跃物理问题待解决
     void EnterJump(InputData inputData) {
         Vector2 jumpDir = inputData.direction != Vector2.zero ? inputData.direction : _playerModel.lastDir;
-        _playerModel.pos += jumpDir * _playerModel.jumpForce;
+        _jumpStartPos = _playerModel.pos;
+        _jumpEndPos = Physics2D.Raycast(_jumpStartPos, jumpDir, _playerModel.jumpForce).point;
+        _jumpTime = 0f;
     }
-    void UpdateJump(InputData inputData) {
-        if (!inputData.jump) {
+    void UpdateJump(InputData inputData, float time) {
+        // 设计点：闪避/跳跃撞到墙是直接打断还是维持状态直到时间结束
+        if (_playerModel.pos == _jumpEndPos) {
+            if (inputData.direction == Vector2.zero)
+                ChangeState(PlayerState.Idle, inputData);
+            else
+                ChangeState(PlayerState.Walking, inputData);
             return;
         }
 
-        Debug.Log($"Player jump: {inputData.jump}");
-
-        Vector2 jumpDir = inputData.direction != Vector2.zero ? inputData.direction : _playerModel.lastDir;
-        _playerModel.pos += jumpDir * _playerModel.jumpForce;
+        _jumpTime = Math.Min(_jumpTime + time, _playerModel.jumpDuration);
+        _playerModel.pos = (_jumpEndPos - _jumpStartPos) * (_jumpTime / _playerModel.jumpDuration);
     }
 }

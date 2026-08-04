@@ -13,7 +13,7 @@ public class Main : MonoBehaviour {
 
     void FixedUpdate() {
         InputData inputData = _inputManager.GetInput();
-        _playerController.RefreshState(inputData);
+        _playerController.Tick(inputData, Time.fixedDeltaTime);
 
         _rendererContext.PlayerModel = _playerController.PlayerModel;
     }

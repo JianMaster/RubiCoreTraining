@@ -7,6 +7,7 @@ public class InputManager : MonoBehaviour {
 
     InputData _inputData;
     void OnEnable() {
+        _inputData = new();
         _moveAction.action.Enable();
         _jumpAction.action.Enable();
     }
