@@ -4,41 +4,40 @@ using UnityEngine.InputSystem;
 public class InputManager : MonoBehaviour {
     [SerializeField] InputActionReference _moveAction;
     [SerializeField] InputActionReference _jumpAction;
+    [SerializeField] InputActionReference _mouseAction;
 
-    InputData _inputData;
     void OnEnable() {
-        _inputData = new();
         _moveAction.action.Enable();
         _jumpAction.action.Enable();
+        _mouseAction.action.Enable();
     }
     void OnDisable() {
         _moveAction.action.Disable();
         _jumpAction.action.Disable();
+        _mouseAction.action.Disable();
     }
 
-    void Update() {
-        _inputData.direction = _moveAction.action.ReadValue<Vector2>();
+    public void GetInput(ref InputData inputData) {
+        inputData.direction = _moveAction.action.ReadValue<Vector2>();
+        Vector2 screenPos = _mouseAction.action.ReadValue<Vector2>();
+        inputData.mousePos = Camera.main.ScreenToWorldPoint(screenPos);
         if (_jumpAction.action.WasPressedThisFrame()) {
-            _inputData.jump = true;
+            inputData.jump = true;
         }
-
-    }
-
-    public InputData GetInput() {
-        InputData inputData = _inputData.Copy();
-        _inputData.jump = false;
-        return inputData;
     }
 }
 
 public class InputData {
     public Vector2 direction;
     public bool jump;
+    public Vector2 mousePos;
+
 
     public InputData Copy() {
         return new InputData {
             direction = this.direction,
-            jump = this.jump
+            jump = this.jump,
+            mousePos = this.mousePos
         };
     }
 }

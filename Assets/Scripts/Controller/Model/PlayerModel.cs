@@ -1,10 +1,9 @@
 using UnityEngine;
 
 public struct PlayerModel {
-    public Vector2 pos;
-    public float speed;
-    public Vector2 lastDir;
-    public float jumpForce;
-    public float jumpDuration;
     public PlayerState state;
+    public Vector2 pos;
+    public Vector2 lastDir;
+    // 集中状态
+    public Vector2 focusDir;
 }

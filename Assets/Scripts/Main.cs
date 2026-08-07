@@ -6,19 +6,25 @@ public class Main : MonoBehaviour {
     [SerializeField] GameRenderer _gameRenderer;
 
     RendererContext _rendererContext;
+    InputData _inputData;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start() {
-        _rendererContext = new RendererContext();
+        _rendererContext = new();
+        _inputData = new();
+    }
+
+    void Update() {
+        _inputManager.GetInput(ref _inputData);
+        _playerController.Tick(_inputData, Time.deltaTime);
     }
 
     void FixedUpdate() {
-        InputData inputData = _inputManager.GetInput();
-        _playerController.Tick(inputData, Time.fixedDeltaTime);
-
-        _rendererContext.PlayerModel = _playerController.PlayerModel;
+        _playerController.PhysicsTick(_inputData, Time.fixedDeltaTime);
+        _inputData.jump = false;
     }
 
     void LateUpdate() {
+        _rendererContext.PlayerModel = _playerController.PlayerModel;
         _gameRenderer.Render(_rendererContext);
     }
 }

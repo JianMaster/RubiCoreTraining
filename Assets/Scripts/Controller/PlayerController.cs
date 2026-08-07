@@ -2,7 +2,7 @@ using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D), typeof(CapsuleCollider2D))]
 public class PlayerController : MonoBehaviour {
-    [Header("Movement")]
+    [Header("配置属性")]
     [SerializeField, Min(0f)] float _moveSpeed = 10f;
     [SerializeField, Min(0f)] float _jumpDistance = 6f;
     [SerializeField, Min(0.01f)] float _jumpDuration = 0.2f;
@@ -15,15 +15,17 @@ public class PlayerController : MonoBehaviour {
         _rigidbody2D = GetComponent<Rigidbody2D>();
         _playerModel = new PlayerModel {
             pos = Vector2.zero,
-            speed = _moveSpeed,
-            jumpForce = _jumpDistance,
-            jumpDuration = _jumpDuration,
             lastDir = Vector2.up,
-            state = PlayerState.Idle
+            state = PlayerState.Idle,
+            focusDir = Vector2.up
         };
     }
 
     public void Tick(InputData inputData, float time) {
+        _playerModel.focusDir = inputData.mousePos - _playerModel.pos;
+    }
+
+    public void PhysicsTick(InputData inputData, float time) {
         _playerModel.pos = _rigidbody2D.position;
 
         switch (_playerModel.state) {
@@ -92,7 +94,7 @@ public class PlayerController : MonoBehaviour {
             return;
         }
 
-        _rigidbody2D.linearVelocity = inputData.direction * _playerModel.speed;
+        _rigidbody2D.linearVelocity = inputData.direction * _moveSpeed;
         _playerModel.lastDir = inputData.direction;
     }
 
@@ -100,12 +102,12 @@ public class PlayerController : MonoBehaviour {
     void EnterJump(InputData inputData) {
         Vector2 _jumpDir = inputData.direction != Vector2.zero ? inputData.direction : _playerModel.lastDir;
         _jumpTime = 0f;
-        _rigidbody2D.linearVelocity = _jumpDir * (_playerModel.jumpForce / _playerModel.jumpDuration);
+        _rigidbody2D.linearVelocity = _jumpDir * (_jumpDistance / _jumpDuration);
     }
 
     void UpdateJump(InputData inputData, float time) {
         _jumpTime += time;
-        if (_jumpTime >= _playerModel.jumpDuration) {
+        if (_jumpTime >= _jumpDuration) {
             ChangeState(inputData.direction == Vector2.zero ? PlayerState.Idle : PlayerState.Walking, inputData);
             return;
         }
