@@ -26,7 +26,7 @@ public class InputManager : MonoBehaviour {
 
     public InputData GetInput() {
         InputData inputData = _inputData.Copy();
-        _inputData.Reset();
+        _inputData.jump = false;
         return inputData;
     }
 }
@@ -34,11 +34,6 @@ public class InputManager : MonoBehaviour {
 public class InputData {
     public Vector2 direction;
     public bool jump;
-
-    public void Reset() {
-        direction = Vector2.zero;
-        jump = false;
-    }
 
     public InputData Copy() {
         return new InputData {
