@@ -3,9 +3,11 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody2D), typeof(CapsuleCollider2D))]
 public class PlayerController : MonoBehaviour {
     [Header("配置属性")]
-    [SerializeField, Min(0f)] float _moveSpeed = 10f;
-    [SerializeField, Min(0f)] float _jumpDistance = 6f;
-    [SerializeField, Min(0.01f)] float _jumpDuration = 0.2f;
+    [SerializeField, Min(0f)] float moveSpeed = 10f;
+    [SerializeField, Min(0f)] float jumpDistance = 6f;
+    [SerializeField, Min(0.01f)] float jumpDuration = 0.2f;
+    [SerializeField] float focusSpeed = 33f;
+    [SerializeField] float atk = 20f;
 
     PlayerModel _playerModel;
     public PlayerModel PlayerModel => _playerModel;
@@ -94,7 +96,7 @@ public class PlayerController : MonoBehaviour {
             return;
         }
 
-        _rigidbody2D.linearVelocity = inputData.direction * _moveSpeed;
+        _rigidbody2D.linearVelocity = inputData.direction * moveSpeed;
         _playerModel.lastDir = inputData.direction;
     }
 
@@ -102,12 +104,12 @@ public class PlayerController : MonoBehaviour {
     void EnterJump(InputData inputData) {
         Vector2 _jumpDir = inputData.direction != Vector2.zero ? inputData.direction : _playerModel.lastDir;
         _jumpTime = 0f;
-        _rigidbody2D.linearVelocity = _jumpDir * (_jumpDistance / _jumpDuration);
+        _rigidbody2D.linearVelocity = _jumpDir * (jumpDistance / jumpDuration);
     }
 
     void UpdateJump(InputData inputData, float time) {
         _jumpTime += time;
-        if (_jumpTime >= _jumpDuration) {
+        if (_jumpTime >= jumpDuration) {
             ChangeState(inputData.direction == Vector2.zero ? PlayerState.Idle : PlayerState.Walking, inputData);
             return;
         }
