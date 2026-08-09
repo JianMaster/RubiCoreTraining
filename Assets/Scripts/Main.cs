@@ -4,6 +4,7 @@ public class Main : MonoBehaviour {
     [SerializeField] PlayerController _playerController;
     [SerializeField] InputManager _inputManager;
     [SerializeField] GameRenderer _gameRenderer;
+    [SerializeField] Enemy _enemy;
 
     RendererContext _rendererContext;
     InputData _inputData;
@@ -24,7 +25,7 @@ public class Main : MonoBehaviour {
     }
 
     void LateUpdate() {
-        _rendererContext.PlayerModel = _playerController.PlayerModel;
+        _rendererContext.PlayerModel = _playerController.Data;
         _gameRenderer.Render(_rendererContext);
     }
 }

@@ -10,7 +10,7 @@ public class PlayerController : MonoBehaviour {
     [SerializeField] float atk = 20f;
 
     PlayerModel _playerModel;
-    public PlayerModel PlayerModel => _playerModel;
+    public PlayerModel Data => _playerModel;
     Rigidbody2D _rigidbody2D;
 
     void Awake() {
@@ -19,12 +19,13 @@ public class PlayerController : MonoBehaviour {
             pos = Vector2.zero,
             lastDir = Vector2.up,
             state = PlayerState.Idle,
+            foward = Vector2.up,
             focusDir = Vector2.up
         };
     }
 
     public void Tick(InputData inputData, float time) {
-        _playerModel.focusDir = inputData.mousePos - _playerModel.pos;
+        _playerModel.foward = inputData.mousePos - _playerModel.pos;
     }
 
     public void PhysicsTick(InputData inputData, float time) {
@@ -39,6 +40,9 @@ public class PlayerController : MonoBehaviour {
                 break;
             case PlayerState.Jumping:
                 UpdateJump(inputData, time);
+                break;
+            case PlayerState.Focusing:
+                UpdateFocus(inputData);
                 break;
         }
     }
@@ -69,6 +73,11 @@ public class PlayerController : MonoBehaviour {
 
     void ExitState(PlayerState state) {
         Debug.Log($"ExitState: {state}");
+        switch (state) {
+            case PlayerState.Walking:
+                _rigidbody2D.linearVelocity = Vector2.zero;
+                break;
+        }
     }
 
     void UpdateIdle(InputData inputData) {
@@ -79,6 +88,11 @@ public class PlayerController : MonoBehaviour {
 
         if (inputData.direction != Vector2.zero) {
             ChangeState(PlayerState.Walking, inputData);
+            return;
+        }
+        
+        if (inputData.onFocus) {
+            ChangeState(PlayerState.Focusing, inputData);
             return;
         }
 
@@ -93,6 +107,11 @@ public class PlayerController : MonoBehaviour {
 
         if (inputData.direction == Vector2.zero) {
             ChangeState(PlayerState.Idle, inputData);
+            return;
+        }
+
+        if (inputData.onFocus) {
+            ChangeState(PlayerState.Focusing, inputData);
             return;
         }
 
@@ -112,6 +131,29 @@ public class PlayerController : MonoBehaviour {
         if (_jumpTime >= jumpDuration) {
             ChangeState(inputData.direction == Vector2.zero ? PlayerState.Idle : PlayerState.Walking, inputData);
             return;
+        }
+    }
+
+    bool hitting = false;
+    void UpdateFocus(InputData inputData) {
+        if (inputData.jump) {
+            ChangeState(PlayerState.Jumping, inputData);
+            return;
+        }
+        
+        if(!inputData.onFocus) {
+            ChangeState(inputData.direction == Vector2.zero ? PlayerState.Idle : PlayerState.Walking, inputData);
+            return;
+        }
+
+        _playerModel.focusDir = _playerModel.foward.normalized;
+        var hit = Physics2D.Raycast(_playerModel.pos,_playerModel.focusDir, 100f, 1 << 8);
+        if(hit.collider != null && !hitting) {
+            hitting = true;
+            Debug.Log($"Hit: {hit.collider.name}");
+        }
+        else {
+            hitting = false;
         }
     }
 

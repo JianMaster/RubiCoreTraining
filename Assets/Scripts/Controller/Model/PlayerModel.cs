@@ -5,5 +5,6 @@ public struct PlayerModel {
     public Vector2 pos;
     public Vector2 lastDir;
     // 集中状态
+    public Vector2 foward;
     public Vector2 focusDir;
 }
