@@ -42,7 +42,7 @@ public class PlayerController : MonoBehaviour {
                 UpdateJump(inputData, time);
                 break;
             case PlayerState.Focusing:
-                UpdateFocus(inputData);
+                UpdateFocus(inputData, time);
                 break;
         }
     }
@@ -67,6 +67,9 @@ public class PlayerController : MonoBehaviour {
                 break;
             case PlayerState.Jumping:
                 EnterJump(inputData);
+                break;
+            case PlayerState.Focusing:
+                ExitFocus();
                 break;
         }
     }
@@ -134,8 +137,8 @@ public class PlayerController : MonoBehaviour {
         }
     }
 
-    bool hitting = false;
-    void UpdateFocus(InputData inputData) {
+    bool _hitting = false;
+    void UpdateFocus(InputData inputData, float time) {
         if (inputData.jump) {
             ChangeState(PlayerState.Jumping, inputData);
             return;
@@ -148,13 +151,16 @@ public class PlayerController : MonoBehaviour {
 
         _playerModel.focusDir = _playerModel.foward.normalized;
         var hit = Physics2D.Raycast(_playerModel.pos,_playerModel.focusDir, 100f, 1 << 8);
-        if(hit.collider != null && !hitting) {
-            hitting = true;
-            Debug.Log($"Hit: {hit.collider.name}");
+        if(hit.collider != null) {
+            _hitting = true;
+            hit.collider.GetComponent<Enemy>().OnFucus(focusSpeed * time);
         }
         else {
-            hitting = false;
+            _hitting = false;
         }
+    }
+    void ExitFocus() {
+        _hitting = false;
     }
 
     void OnDisable() {

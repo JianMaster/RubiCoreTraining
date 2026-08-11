@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class Enemy : MonoBehaviour {
@@ -10,10 +11,15 @@ public class Enemy : MonoBehaviour {
     EnemyModel _enemyModel;
     public EnemyModel Data => _enemyModel;
 
+    public event Action<EnemyModel> OnHpChanged;
+    public event Action<EnemyModel> OnFocusChanged;
+
     void Awake() {
         _enemyModel = new EnemyModel() {
             hp = hp,
+            maxHp = hp,
             focusGauge = 0,
+            maxFocusGauge = maxFocusGauge,
             focusLevel = 0,
         };
     }
@@ -24,10 +30,12 @@ public class Enemy : MonoBehaviour {
             _enemyModel.focusGauge = 0;
             _enemyModel.focusLevel++;
         }
+        OnFocusChanged?.Invoke(_enemyModel);
     }
 
     public void OnHit() {
         hp -= focusLevelData[_enemyModel.focusLevel];
+        OnHpChanged?.Invoke(_enemyModel);
     }
 
 

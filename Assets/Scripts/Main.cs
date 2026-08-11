@@ -5,6 +5,7 @@ public class Main : MonoBehaviour {
     [SerializeField] InputManager _inputManager;
     [SerializeField] GameRenderer _gameRenderer;
     [SerializeField] Enemy _enemy;
+    [SerializeField] EnemyHUD _enemyHUD;
 
     RendererContext _rendererContext;
     InputData _inputData;
@@ -12,6 +13,9 @@ public class Main : MonoBehaviour {
     void Start() {
         _rendererContext = new();
         _inputData = new();
+
+        _enemy.OnHpChanged += _enemyHUD.OnHpChanged;
+        _enemy.OnFocusChanged += _enemyHUD.OnFocusChanged;
     }
 
     void Update() {
