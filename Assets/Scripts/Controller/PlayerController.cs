@@ -153,7 +153,7 @@ public class PlayerController : MonoBehaviour {
         var hit = Physics2D.Raycast(_playerModel.pos,_playerModel.focusDir, 100f, 1 << 8);
         if(hit.collider != null) {
             _hitting = true;
-            hit.collider.GetComponent<Enemy>().OnFucus(focusSpeed * time);
+            hit.collider.GetComponentInParent<Enemy>().OnFucus(focusSpeed * time);
         }
         else {
             _hitting = false;

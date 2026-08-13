@@ -13,9 +13,18 @@ public class Main : MonoBehaviour {
     void Start() {
         _rendererContext = new();
         _inputData = new();
+        _enemyHUD.Init(_enemy.Data, _enemy.HUDAnchor.GetChild(0), _enemy.HUDAnchor.GetChild(1));
 
+    }
+
+    void OnEnable() {
         _enemy.OnHpChanged += _enemyHUD.OnHpChanged;
         _enemy.OnFocusChanged += _enemyHUD.OnFocusChanged;
+    }
+
+    void OnDisable() {
+        _enemy.OnHpChanged -= _enemyHUD.OnHpChanged;
+        _enemy.OnFocusChanged -= _enemyHUD.OnFocusChanged;
     }
 
     void Update() {

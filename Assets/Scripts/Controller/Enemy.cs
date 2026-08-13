@@ -8,11 +8,12 @@ public class Enemy : MonoBehaviour {
     [SerializeField] int maxFocusLevel = 3;
     [SerializeField] float[] focusLevelData = new float[] { 0f, 20f, 40f, 60f, 80f, 100f };
 
+    public Transform HUDAnchor;
     EnemyModel _enemyModel;
     public EnemyModel Data => _enemyModel;
 
-    public event Action<EnemyModel> OnHpChanged;
-    public event Action<EnemyModel> OnFocusChanged;
+    public event Action<float, float> OnHpChanged;
+    public event Action<float, float, int> OnFocusChanged;
 
     void Awake() {
         _enemyModel = new EnemyModel() {
@@ -30,12 +31,12 @@ public class Enemy : MonoBehaviour {
             _enemyModel.focusGauge = 0;
             _enemyModel.focusLevel++;
         }
-        OnFocusChanged?.Invoke(_enemyModel);
+        OnFocusChanged?.Invoke(_enemyModel.focusGauge, _enemyModel.maxFocusGauge, _enemyModel.focusLevel);
     }
 
     public void OnHit() {
         hp -= focusLevelData[_enemyModel.focusLevel];
-        OnHpChanged?.Invoke(_enemyModel);
+        OnHpChanged?.Invoke(_enemyModel.hp, _enemyModel.maxHp);
     }
 
 
