@@ -63,13 +63,8 @@ public class PlayerController : MonoBehaviour {
             case PlayerState.Idle:
                 _rigidbody2D.linearVelocity = Vector2.zero;
                 break;
-            case PlayerState.Walking:
-                break;
             case PlayerState.Jumping:
                 EnterJump(inputData);
-                break;
-            case PlayerState.Focusing:
-                ExitFocus();
                 break;
         }
     }
@@ -79,6 +74,9 @@ public class PlayerController : MonoBehaviour {
         switch (state) {
             case PlayerState.Walking:
                 _rigidbody2D.linearVelocity = Vector2.zero;
+                break;
+            case PlayerState.Focusing:
+                ExitFocus();
                 break;
         }
     }
@@ -93,7 +91,7 @@ public class PlayerController : MonoBehaviour {
             ChangeState(PlayerState.Walking, inputData);
             return;
         }
-        
+
         if (inputData.onFocus) {
             ChangeState(PlayerState.Focusing, inputData);
             return;
@@ -137,30 +135,38 @@ public class PlayerController : MonoBehaviour {
         }
     }
 
-    bool _hitting = false;
+    Enemy _focusedEnemy;
     void UpdateFocus(InputData inputData, float time) {
+        if (inputData.attack && _focusedEnemy != null && _focusedEnemy.CanRush) {
+            _focusedEnemy.OnRush();
+            ChangeState(PlayerState.Idle, inputData);
+            return;
+        }
         if (inputData.jump) {
             ChangeState(PlayerState.Jumping, inputData);
             return;
         }
-        
-        if(!inputData.onFocus) {
+
+        if (!inputData.onFocus) {
             ChangeState(inputData.direction == Vector2.zero ? PlayerState.Idle : PlayerState.Walking, inputData);
             return;
         }
 
         _playerModel.focusDir = _playerModel.foward.normalized;
-        var hit = Physics2D.Raycast(_playerModel.pos,_playerModel.focusDir, 100f, 1 << 8);
-        if(hit.collider != null) {
-            _hitting = true;
-            hit.collider.GetComponentInParent<Enemy>().OnFucus(focusSpeed * time);
+        var hit = Physics2D.Raycast(_playerModel.pos, _playerModel.focusDir, 100f, 1 << 8);
+        if (hit.collider != null) {
+            _focusedEnemy = hit.collider.GetComponentInParent<Enemy>();
+            _focusedEnemy.OnFucus(focusSpeed * time);
         }
         else {
-            _hitting = false;
+            if (_focusedEnemy != null)
+                _focusedEnemy.ExitFocus();
         }
     }
     void ExitFocus() {
-        _hitting = false;
+        if (_focusedEnemy != null)
+            _focusedEnemy.ExitFocus();
+        _focusedEnemy = null;
     }
 
     void OnDisable() {

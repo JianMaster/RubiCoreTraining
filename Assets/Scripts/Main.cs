@@ -30,11 +30,13 @@ public class Main : MonoBehaviour {
     void Update() {
         _inputManager.GetInput(ref _inputData);
         _playerController.Tick(_inputData, Time.deltaTime);
+        _enemy.Tick(Time.deltaTime);
     }
 
     void FixedUpdate() {
         _playerController.PhysicsTick(_inputData, Time.fixedDeltaTime);
         _inputData.jump = false;
+        _inputData.attack = false;
     }
 
     void LateUpdate() {
