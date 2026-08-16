@@ -6,14 +6,20 @@ public class EnemyHUD : MonoBehaviour {
     [SerializeField] Slider _focusBar;
     [SerializeField] Text _focusLevelText;
 
+    Enemy _enemy;
     Transform _hpbarAnchor;
     Transform _focusbarAnchor;
-    public void Init(EnemyModel data, Transform hpbarAnchor, Transform focusbarAnchor) {
+    public void Init(Enemy enemy) {
+        _enemy = enemy;
+        enemy.OnHpChangedEvent += OnHpChanged;
+        enemy.OnFocusChangedEvent += OnFocusChanged;
+
+        EnemyModel data = enemy.Data;
         _hpBar.value = data.hp / data.maxHp;
         _focusBar.value = data.focusGauge / data.maxFocusGauge;
-        
-        _hpbarAnchor = hpbarAnchor;
-        _focusbarAnchor = focusbarAnchor;
+
+        _hpbarAnchor = enemy.HUDAnchor.GetChild(0); ;
+        _focusbarAnchor = enemy.HUDAnchor.GetChild(1);
     }
 
     void Update() {
@@ -28,5 +34,10 @@ public class EnemyHUD : MonoBehaviour {
     public void OnFocusChanged(float focusGauge, float maxFocusGauge, int focusLevel) {
         _focusBar.value = focusGauge / maxFocusGauge;
         _focusLevelText.text = focusLevel.ToString();
+    }
+    
+    void OnDestroy() {
+        _enemy.OnHpChangedEvent -= OnHpChanged;
+        _enemy.OnFocusChangedEvent -= OnFocusChanged;
     }
 }

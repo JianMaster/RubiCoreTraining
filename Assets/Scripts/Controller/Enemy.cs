@@ -14,8 +14,9 @@ public class Enemy : MonoBehaviour {
     public EnemyModel Data => _enemyModel;
     public bool CanRush => _enemyModel.focusLevel != 0;
 
-    public event Action<float, float> OnHpChanged;
-    public event Action<float, float, int> OnFocusChanged;
+    public event Action<float, float> OnHpChangedEvent;
+    public event Action<int> OnRushEvent;
+    public event Action<float, float, int> OnFocusChangedEvent;
 
     bool _isFocused = false;
 
@@ -37,7 +38,7 @@ public class Enemy : MonoBehaviour {
                 _enemyModel.focusLevel = Mathf.Max(_enemyModel.focusLevel - 1, 0);
             }
             _enemyModel.focusGauge = Mathf.Max(_enemyModel.focusGauge, 0);
-            OnFocusChanged?.Invoke(_enemyModel.focusGauge, _enemyModel.maxFocusGauge, _enemyModel.focusLevel);
+            OnFocusChangedEvent?.Invoke(_enemyModel.focusGauge, _enemyModel.maxFocusGauge, _enemyModel.focusLevel);
         }
     }
 
@@ -48,7 +49,7 @@ public class Enemy : MonoBehaviour {
             _enemyModel.focusGauge = 0;
             _enemyModel.focusLevel++;
         }
-        OnFocusChanged?.Invoke(_enemyModel.focusGauge, _enemyModel.maxFocusGauge, _enemyModel.focusLevel);
+        OnFocusChangedEvent?.Invoke(_enemyModel.focusGauge, _enemyModel.maxFocusGauge, _enemyModel.focusLevel);
     }
 
     public void ExitFocus() {
@@ -59,7 +60,8 @@ public class Enemy : MonoBehaviour {
         _enemyModel.hp -= focusLevelData[_enemyModel.focusLevel];
         _enemyModel.focusGauge = 0;
         _enemyModel.focusLevel = 0;
-        OnHpChanged?.Invoke(_enemyModel.hp, _enemyModel.maxHp);
+        OnHpChangedEvent?.Invoke(_enemyModel.hp, _enemyModel.maxHp);
+        OnRushEvent?.Invoke(1);
     }
 
 

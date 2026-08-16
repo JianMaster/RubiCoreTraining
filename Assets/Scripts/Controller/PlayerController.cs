@@ -179,17 +179,20 @@ public class PlayerController : MonoBehaviour {
     }
 
     float _rushTime;
+    float _hitTime;
     void EnterRushing(InputData inputData) {
         Vector2 rushDir = (Vector2)_rushEnemy.transform.position - _rigidbody2D.position;
-        Vector2 targetPos = rushDir.normalized * rushDistance + rushDir;
+        Vector2 target = rushDir.normalized * rushDistance + rushDir;
         _rushTime = 0f;
-        _rigidbody2D.linearVelocity = targetPos / rushDuration;
+        _hitTime = rushDir.magnitude / target.magnitude * rushDuration;
+        _rigidbody2D.linearVelocity = target / rushDuration;
     }
 
     void UpdateRushing(InputData inputData, float time) {
         _rushTime += time;
         if (_rushTime >= rushDuration) {
-            _rushEnemy.OnRush();
+            if (_rushTime >= _hitTime)
+                _rushEnemy.OnRush();
             ChangeState(inputData.direction == Vector2.zero ? PlayerState.Idle : PlayerState.Walking, inputData);
             return;
         }
