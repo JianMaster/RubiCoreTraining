@@ -8,6 +8,8 @@ public class PlayerController : MonoBehaviour {
     [SerializeField, Min(0.01f)] float jumpDuration = 0.2f;
     [SerializeField] float focusSpeed = 33f;
     [SerializeField] float atk = 20f;
+    [SerializeField] float rushDistance = 6f;
+    [SerializeField] float rushDuration = 0.1f;
 
     PlayerModel _playerModel;
     public PlayerModel Data => _playerModel;
@@ -44,6 +46,9 @@ public class PlayerController : MonoBehaviour {
             case PlayerState.Focusing:
                 UpdateFocus(inputData, time);
                 break;
+            case PlayerState.Rushing:
+                UpdateRushing(inputData, time);
+                break;
         }
     }
 
@@ -65,6 +70,9 @@ public class PlayerController : MonoBehaviour {
                 break;
             case PlayerState.Jumping:
                 EnterJump(inputData);
+                break;
+            case PlayerState.Rushing:
+                EnterRushing(inputData);
                 break;
         }
     }
@@ -122,9 +130,9 @@ public class PlayerController : MonoBehaviour {
 
     float _jumpTime;
     void EnterJump(InputData inputData) {
-        Vector2 _jumpDir = inputData.direction != Vector2.zero ? inputData.direction : _playerModel.lastDir;
+        Vector2 jumpDir = inputData.direction != Vector2.zero ? inputData.direction : _playerModel.lastDir;
         _jumpTime = 0f;
-        _rigidbody2D.linearVelocity = _jumpDir * (jumpDistance / jumpDuration);
+        _rigidbody2D.linearVelocity = jumpDir * (jumpDistance / jumpDuration);
     }
 
     void UpdateJump(InputData inputData, float time) {
@@ -135,11 +143,12 @@ public class PlayerController : MonoBehaviour {
         }
     }
 
-    Enemy _focusedEnemy;
+    Enemy _focusingEnemy;
+    Enemy _rushEnemy;
     void UpdateFocus(InputData inputData, float time) {
-        if (inputData.attack && _focusedEnemy != null && _focusedEnemy.CanRush) {
-            _focusedEnemy.OnRush();
-            ChangeState(PlayerState.Idle, inputData);
+        if (inputData.attack && _focusingEnemy != null && _focusingEnemy.CanRush) {
+            _rushEnemy = _focusingEnemy;
+            ChangeState(PlayerState.Rushing, inputData);
             return;
         }
         if (inputData.jump) {
@@ -155,19 +164,37 @@ public class PlayerController : MonoBehaviour {
         _playerModel.focusDir = _playerModel.foward.normalized;
         var hit = Physics2D.Raycast(_playerModel.pos, _playerModel.focusDir, 100f, 1 << 8);
         if (hit.collider != null) {
-            _focusedEnemy = hit.collider.GetComponentInParent<Enemy>();
-            _focusedEnemy.OnFucus(focusSpeed * time);
+            _focusingEnemy = hit.collider.GetComponentInParent<Enemy>();
+            _focusingEnemy.OnFucus(focusSpeed * time);
         }
         else {
-            if (_focusedEnemy != null)
-                _focusedEnemy.ExitFocus();
+            if (_focusingEnemy != null)
+                _focusingEnemy.ExitFocus();
         }
     }
     void ExitFocus() {
-        if (_focusedEnemy != null)
-            _focusedEnemy.ExitFocus();
-        _focusedEnemy = null;
+        if (_focusingEnemy != null)
+            _focusingEnemy.ExitFocus();
+        _focusingEnemy = null;
     }
+
+    float _rushTime;
+    void EnterRushing(InputData inputData) {
+        Vector2 rushDir = (Vector2)_rushEnemy.transform.position - _rigidbody2D.position;
+        Vector2 targetPos = rushDir.normalized * rushDistance + rushDir;
+        _rushTime = 0f;
+        _rigidbody2D.linearVelocity = targetPos / rushDuration;
+    }
+
+    void UpdateRushing(InputData inputData, float time) {
+        _rushTime += time;
+        if (_rushTime >= rushDuration) {
+            _rushEnemy.OnRush();
+            ChangeState(inputData.direction == Vector2.zero ? PlayerState.Idle : PlayerState.Walking, inputData);
+            return;
+        }
+    }
+
 
     void OnDisable() {
         if (_rigidbody2D != null)
