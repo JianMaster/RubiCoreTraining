@@ -9,7 +9,7 @@ public class EnemyHUD : MonoBehaviour {
     Enemy _enemy;
     Transform _hpbarAnchor;
     Transform _focusbarAnchor;
-    public void Init(Enemy enemy) {
+    public void Bind(Enemy enemy) {
         _enemy = enemy;
         enemy.OnHpChangedEvent += OnHpChanged;
         enemy.OnFocusChangedEvent += OnFocusChanged;
@@ -35,7 +35,7 @@ public class EnemyHUD : MonoBehaviour {
         _focusBar.value = focusGauge / maxFocusGauge;
         _focusLevelText.text = focusLevel.ToString();
     }
-    
+
     void OnDestroy() {
         _enemy.OnHpChangedEvent -= OnHpChanged;
         _enemy.OnFocusChangedEvent -= OnFocusChanged;

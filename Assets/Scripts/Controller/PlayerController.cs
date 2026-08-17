@@ -14,8 +14,10 @@ public class PlayerController : MonoBehaviour {
     PlayerModel _playerModel;
     public PlayerModel Data => _playerModel;
     Rigidbody2D _rigidbody2D;
+    public PlayerRenderer Renderer { get; set; }
 
     void Awake() {
+        Renderer = GetComponentInChildren<PlayerRenderer>();
         _rigidbody2D = GetComponent<Rigidbody2D>();
         _playerModel = new PlayerModel {
             pos = Vector2.zero,
@@ -180,19 +182,24 @@ public class PlayerController : MonoBehaviour {
 
     float _rushTime;
     float _hitTime;
+    bool _rushHitTriggered;
     void EnterRushing(InputData inputData) {
         Vector2 rushDir = (Vector2)_rushEnemy.transform.position - _rigidbody2D.position;
         Vector2 target = rushDir.normalized * rushDistance + rushDir;
         _rushTime = 0f;
         _hitTime = rushDir.magnitude / target.magnitude * rushDuration;
+        _rushHitTriggered = false;
         _rigidbody2D.linearVelocity = target / rushDuration;
+        Debug.Log($"hitTime:{_hitTime}, rushTime:{rushDuration}");
     }
 
     void UpdateRushing(InputData inputData, float time) {
         _rushTime += time;
+        if (!_rushHitTriggered && _rushTime >= _hitTime) {
+            _rushHitTriggered = true;
+            _rushEnemy.OnRush();
+        }
         if (_rushTime >= rushDuration) {
-            if (_rushTime >= _hitTime)
-                _rushEnemy.OnRush();
             ChangeState(inputData.direction == Vector2.zero ? PlayerState.Idle : PlayerState.Walking, inputData);
             return;
         }

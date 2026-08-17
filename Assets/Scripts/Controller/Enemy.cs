@@ -13,6 +13,7 @@ public class Enemy : MonoBehaviour {
     EnemyModel _enemyModel;
     public EnemyModel Data => _enemyModel;
     public bool CanRush => _enemyModel.focusLevel != 0;
+    public EnemyRenderer Renderer { get; set; }
 
     public event Action<float, float> OnHpChangedEvent;
     public event Action<int> OnRushEvent;
@@ -28,9 +29,11 @@ public class Enemy : MonoBehaviour {
             maxFocusGauge = maxFocusGauge,
             focusLevel = 0,
         };
+        Renderer = GetComponentInChildren<EnemyRenderer>();
+        Renderer.Init(this);
     }
 
-    public void Tick(float time) {
+    public void PhysicsTick(float time) {
         if (!_isFocused) {
             _enemyModel.focusGauge -= focusMinus * time;
             if (_enemyModel.focusGauge < 0 && _enemyModel.focusLevel > 0) {

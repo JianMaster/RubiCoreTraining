@@ -1,11 +1,11 @@
 using UnityEngine;
 
 public class GameRenderer : MonoBehaviour {
-    [SerializeField] PlayerRenderer _playerRenderer;
-    [SerializeField] EnemyRenderer _enemyRenderer;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start() {
-
+    PlayerRenderer _playerRenderer;
+    EnemyRenderer _enemyRenderer;
+    public void Bind(PlayerRenderer player, EnemyRenderer enemy) {
+        _playerRenderer = player;
+        _enemyRenderer = enemy;
     }
 
     // Update is called once per frame
